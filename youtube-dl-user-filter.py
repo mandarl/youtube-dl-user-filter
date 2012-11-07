@@ -16,7 +16,7 @@ def getSettings():
     
 def getUploadedVideoIds(userName):
     videoIds = []
-    url = 'http://gdata.youtube.com/feeds/base/videos?author=' + userName + '&fields=entry%28link[@rel=%27alternate%27]%28@href%29%29'
+    url = 'http://gdata.youtube.com/feeds/base/videos?author=' + userName + '&orderby=published&fields=entry%28link[@rel=%27alternate%27]%28@href%29%29'
     feed = ET.parse(urllib.urlopen(url)).getroot()
     for entry in feed:
         for link in entry:
@@ -30,16 +30,18 @@ def checkFolder(folderPath):
 
 def processUser(user, basePath):
     userName = user.attrib['name']
-    print 'Processing user:' + userName
+    print 'Processing user: ' + userName
     videoIds = getUploadedVideoIds(userName)
     for folder in user:
         folderName = folder.attrib['name']
+        print '\t|-- Processing folder: ' + folderName
         folderPath = os.path.join(basePath, folderName)
         folderPattern = folder.attrib['pattern']
         checkFolder(folderPath)
         for videoId in videoIds:
-            command = 'youtube-dl -o "' + folderPath + os.sep + '%(upload_date)s-%(stitle)s.%(ext)s" ' + videoId
-            print command
+            print '\t\t|-- Processing video: ' + videoId
+            command = './youtube-dl -o "' + folderPath + os.sep + '%(upload_date)s-%(stitle)s.%(ext)s" --quiet --match-title "' + folderPattern + '" '+ videoId
+            os.system(command)
 
 
 def main():

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!-- All folders are created relative to the baseDirectoryPath -->
+<root baseDirectoryPath="./data">
+    <user name="PBSNewsHour">
+        <!-- Make a folder named "Shields and Brooks" and download all videos
+                with the title matching the regex pattern (Shields|Brooks) -->
+        <folder name="Shields and Brooks" pattern="(git |Brooks)" />
+    </user>
+</root>
