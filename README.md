@@ -7,3 +7,6 @@ Python script to download videos uploaded by specified users and filters
 * Make sure download happens async so that parallel downloads dont choke b/w.
 * Error handling
 * Unit tests
+
+**CONTRIBUTE:**
+Contribute on cloud9: c9.io/mandarlimaye123/youtube-dl-user-filter
