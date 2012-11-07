@@ -6,6 +6,7 @@
 
 import xml.etree.ElementTree as ET
 import urllib
+import os
 
 
 def getSettings():
@@ -22,27 +23,30 @@ def getUploadedVideoIds(userName):
             videoIds.append(link.attrib['href'])
     return videoIds
     
-def checkFolder(folderName, basePath):
-    folderPath = folderName + basePath
-    if(os.path.isdir(folderPath)):
-        print 'here'
+def checkFolder(folderPath):
+    if not os.path.isdir(folderPath):
+        os.makedirs(folderPath, 0755)
 
 
-def processUser(user):
+def processUser(user, basePath):
     userName = user.attrib['name']
     print 'Processing user:' + userName
     videoIds = getUploadedVideoIds(userName)
     for folder in user:
         folderName = folder.attrib['name']
+        folderPath = os.path.join(basePath, folderName)
         folderPattern = folder.attrib['pattern']
-        checkFolder(folderName)
+        checkFolder(folderPath)
+        for videoId in videoIds:
+            command = 'youtube-dl -o "' + folderPath + os.sep + '%(upload_date)s-%(stitle)s.%(ext)s" ' + videoId
+            print command
 
 
 def main():
     settings = getSettings()
     basePath = settings.attrib['baseDirectoryPath']
-    print baseFolder
+    print basePath
     for user in settings:
-        #processUser(user)
-    
+        processUser(user, basePath)
+
 main()
