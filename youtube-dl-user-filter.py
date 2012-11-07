@@ -22,18 +22,27 @@ def getUploadedVideoIds(userName):
             videoIds.append(link.attrib['href'])
     return videoIds
     
+def checkFolder(folderName, basePath):
+    folderPath = folderName + basePath
+    if(os.path.isdir(folderPath)):
+        print 'here'
+
 
 def processUser(user):
     userName = user.attrib['name']
     print 'Processing user:' + userName
     videoIds = getUploadedVideoIds(userName)
-    print videoIds
-    #for user in settings:
+    for folder in user:
+        folderName = folder.attrib['name']
+        folderPattern = folder.attrib['pattern']
+        checkFolder(folderName)
 
 
 def main():
     settings = getSettings()
+    basePath = settings.attrib['baseDirectoryPath']
+    print baseFolder
     for user in settings:
-        processUser(user)
+        #processUser(user)
     
 main()
