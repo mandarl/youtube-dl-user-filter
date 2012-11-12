@@ -9,6 +9,8 @@ import urllib
 import os
 import subprocess
 import re
+import time
+import sys, traceback
 
 
 def getSettings():
@@ -28,6 +30,19 @@ def getUploadedVideoIds(userName):
 def checkFolder(folderPath):
     if not os.path.isdir(folderPath):
         os.makedirs(folderPath, 0755)
+
+def cleanDirectory(directoryPath, daysToKeep):
+    try:
+        now = time.time()
+        for f in os.listdir(directoryPath):
+            if os.stat(f).st_mtime < now - daysToKeep * 86400:
+                print 'deleting file:' + f
+                if os.path.isfile(f):
+                    print 'deleting file:' + f
+                    os.remove(os.path.join(path, f))
+    except Exception as e:
+        print 'Error deleting file!'
+        print traceback.format_exception(*sys.exc_info())
 
 def getExecutableName():
     osname = os.name
@@ -54,23 +69,27 @@ def processUser(user, basePath):
         maxQuality = user.attrib['maxQuality']
     except KeyError:
         maxQuality = "18"
-    print maxQuality
     print 'Processing user: ' + userName
     videoIds = getUploadedVideoIds(userName)
     for folder in user:
+        try:
+            daysToKeep = folder.attrib['daysToKeep']
+        except KeyError:
+            daysToKeep = "30"
         folderName = folder.attrib['name']
         print '\t|-- Processing folder: ' + folderName
         folderPath = os.path.join(basePath, folderName)
         folderPattern = folder.attrib['pattern']
         prog = re.compile(folderPattern)
         checkFolder(folderPath)
+        cleanDirectory(folderPath, daysToKeep)
         for videoId in videoIds:
             title = getTitle(videoId)
             result = prog.search(title)
             if result:
-                print '\t\t|-- Processing video: ' + title
+                print '\n\t\t|-- Processing video: ' + title
                 executable = getExecutableName()
-                argument = ' -o "' + folderPath + os.sep + '%(upload_date)s-%(stitle)s.%(ext)s" --quiet --match-title "' + folderPattern + '" "'+ videoId + '"'
+                argument = ' --output "' + folderPath + os.sep + '%(upload_date)s-%(stitle)s.%(ext)s" --max-quality ' + maxQuality + ' --match-title "' + folderPattern + '" "'+ videoId + '"'
                 command = executable + argument
                 os.system(command)
 
