@@ -40,7 +40,15 @@ def processUser(user, basePath):
         checkFolder(folderPath)
         for videoId in videoIds:
             print '\t\t|-- Processing video: ' + videoId
-            command = './youtube-dl -o "' + folderPath + os.sep + '%(upload_date)s-%(stitle)s.%(ext)s" --quiet --match-title "' + folderPattern + '" '+ videoId
+            osname = os.name
+            if osname == 'posix':
+                executable = '.' + os.sep + 'youtube-dl'
+            elif osname == 'nt':
+                executable = 'python youtube-dl'
+            else:
+                raise Exception('Unknown OS: this script only works on NT or POSIX')
+            argument = ' -o "' + folderPath + os.sep + '%(upload_date)s-%(stitle)s.%(ext)s" --quiet --match-title "' + folderPattern + '" '+ videoId
+            command = executable + argument
             os.system(command)
 
 
