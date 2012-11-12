@@ -85,6 +85,7 @@ def processUser(user, basePath):
         cleanDirectory(folderPath, daysToKeep)
         for videoId in videoIds:
             title = getTitle(videoId)
+            print 'title:' + title
             result = prog.search(title)
             if result:
                 print '\n\t\t|-- Processing video: ' + title

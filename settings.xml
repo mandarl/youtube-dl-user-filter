@@ -3,7 +3,30 @@
 <root baseDirectoryPath="./data">
     <user name="PBSNewsHour" maxQuality="18">
         <!-- Make a folder named "Shields and Brooks" and download all videos
-                with the title matching the regex pattern (Shields|Brooks) -->
-        <folder name="Shields and Brooks" pattern="(Shields|Brooks)" adaysToKeep="30" />
+                with the title matching the regex pattern (Shields|Brooks) 
+        <folder name="Shields and Brooks" pattern="(Shields|Brooks)" daysToKeep="30" />-->
+    </user>
+    <user name="setindia" maxQuality="18">
+        <folder name="Sony\Adaalat" pattern="^Adaalat" daysToKeep="10" />
+        <folder name="Sony\Bade Acche Lagte Hai" pattern="^Bade Acche Lagte Hai" daysToKeep="10" />
+    </user>
+    
+    <user name="BloombergUTV" maxQuality="18">
+        <folder name="BloombergUTV\TheOutsider" pattern="^The Outsider" daysToKeep="10" />
+        <folder name="BloombergUTV\Aspire" pattern="^Aspire" daysToKeep="10" />
+    </user>
+    
+    <user name="CNBCTV18" maxQuality="18">
+        <folder name="CNBC\Beautiful People" pattern="^Beautiful People" daysToKeep="10" />
+        <folder name="CNBC\Storyboard" pattern="^Storyboard" daysToKeep="10" />
+    </user>
+    
+    <user name="ndtv" maxQuality="18">
+        <folder name="NDTV\Walk The Talk" pattern="^Walk The Talk" daysToKeep="10" />
+        <folder name="CNBC\Storyboard" pattern="^Storyboard" daysToKeep="10" />
+    </user>
+    
+    <user name="sanjeevkapoorkhazana" maxQuality="18">
+        <folder name="Sanjeev Kapoor Khazana" pattern="^.*" daysToKeep="60" />
     </user>
 </root>
