@@ -18,14 +18,25 @@ def getSettings():
     settings = tree.getroot()
     return settings
     
+def getTitle(videoId):
+    executable = getExecutableName()
+    argument = ' --get-title "' + videoId + '"'
+    command = executable + argument
+    proc =  subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    title = proc.stdout.readline()
+    proc.stdout.readline()
+    return title
+
+    
 def getUploadedVideoIds(userName):
-    videoIds = []
+    videoIdDict = {}
     url = 'http://gdata.youtube.com/feeds/base/videos?author=' + userName + '&orderby=published&fields=entry%28link[@rel=%27alternate%27]%28@href%29%29'
     feed = ET.parse(urllib.urlopen(url)).getroot()
     for entry in feed:
         for link in entry:
-            videoIds.append(link.attrib['href'])
-    return videoIds
+            videoId = link.attrib['href']
+            videoIdDict[videoId] = getTitle(videoId)
+    return videoIdDict
     
 def checkFolder(folderPath):
     if not os.path.isdir(folderPath):
@@ -35,11 +46,11 @@ def cleanDirectory(directoryPath, daysToKeep):
     try:
         now = time.time()
         for f in os.listdir(directoryPath):
-            if os.stat(f).st_mtime < now - daysToKeep * 86400:
+            if os.stat(os.path.join(directoryPath, f)).st_mtime < now - daysToKeep * 86400:
                 print 'deleting file:' + f
                 if os.path.isfile(f):
                     print 'deleting file:' + f
-                    os.remove(os.path.join(path, f))
+                    #os.remove(os.path.join(directoryPath, f))
     except Exception as e:
         print 'Error deleting file!'
         print traceback.format_exception(*sys.exc_info())
@@ -54,14 +65,6 @@ def getExecutableName():
         raise Exception('Unknown OS: this script only works on NT or POSIX')
     return executable
     
-def getTitle(videoId):
-    executable = getExecutableName()
-    argument = ' --get-title "' + videoId + '"'
-    command = executable + argument
-    proc =  subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    title = proc.stdout.readline()
-    proc.stdout.readline()
-    return title
 
 def processUser(user, basePath):
     userName = user.attrib['name']
@@ -70,12 +73,12 @@ def processUser(user, basePath):
     except KeyError:
         maxQuality = "18"
     print 'Processing user: ' + userName
-    videoIds = getUploadedVideoIds(userName)
+    videoIdDict = getUploadedVideoIds(userName)
     for folder in user:
         try:
-            daysToKeep = folder.attrib['daysToKeep']
+            daysToKeep = float(folder.attrib['daysToKeep'])
         except KeyError:
-            daysToKeep = "30"
+            daysToKeep = 30.0
         folderName = folder.attrib['name']
         print '\t|-- Processing folder: ' + folderName
         folderPath = os.path.join(basePath, folderName)
@@ -83,16 +86,18 @@ def processUser(user, basePath):
         prog = re.compile(folderPattern)
         checkFolder(folderPath)
         cleanDirectory(folderPath, daysToKeep)
-        for videoId in videoIds:
-            title = getTitle(videoId)
-            print 'title:' + title
-            result = prog.search(title)
+        for videoId,videoTitle in videoIdDict.iteritems():
+            result = prog.search(videoTitle)
             if result:
-                print '\n\t\t|-- Processing video: ' + title
+                print '\n\t\t|-- Processing video: ' + videoTitle
                 executable = getExecutableName()
                 argument = ' --output "' + folderPath + os.sep + '%(upload_date)s-%(stitle)s.%(ext)s" --max-quality ' + maxQuality + ' --match-title "' + folderPattern + '" "'+ videoId + '"'
                 command = executable + argument
-                os.system(command)
+                ret = os.system(command)
+                if ret == 0:
+                    print '*****download successfull'
+                else:
+                    print '*****download unsuccessfull - will try again on next iteration'
 
 
 def main():
