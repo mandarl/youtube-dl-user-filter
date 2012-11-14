@@ -11,6 +11,7 @@ import subprocess
 import re
 import time
 import sys, traceback
+import pprint
 
 
 def getSettings():
@@ -18,29 +19,24 @@ def getSettings():
     settings = tree.getroot()
     return settings
     
-def getTitle(videoId):
-    executable = getExecutableName()
-    argument = ' --get-title "' + videoId + '"'
-    command = executable + argument
-    proc =  subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    title = proc.stdout.readline()
-    proc.stdout.readline()
-    return title
-
     
 def getUploadedVideoIds(userName):
     videoIdDict = {}
-    url = 'http://gdata.youtube.com/feeds/base/videos?author=' + userName + '&orderby=published&fields=entry%28link[@rel=%27alternate%27]%28@href%29%29'
+    url = 'http://gdata.youtube.com/feeds/base/videos?author=' + userName + '&orderby=published&fields=entry%28title%2Clink[@rel=%27alternate%27]%28@href%29%29'
     feed = ET.parse(urllib.urlopen(url)).getroot()
     for entry in feed:
-        for link in entry:
-            videoId = link.attrib['href']
-            videoIdDict[videoId] = getTitle(videoId)
+        videoId = entry[1].attrib['href']
+        videoIdDict[videoId] = entry[0].text
     return videoIdDict
     
 def checkFolder(folderPath):
     if not os.path.isdir(folderPath):
         os.makedirs(folderPath, 0755)
+        
+def checkDoneFolder(basePath):
+    doneFolderPath = os.path.join(basePath, '.done')
+    checkFolder(doneFolderPath)
+    return doneFolderPath
 
 def cleanDirectory(directoryPath, daysToKeep):
     try:
@@ -54,6 +50,29 @@ def cleanDirectory(directoryPath, daysToKeep):
     except Exception as e:
         print 'Error deleting file!'
         print traceback.format_exception(*sys.exc_info())
+
+def getVideoHash(videoId):
+    match = re.search('v\=([^&]+)', videoId)
+    if match:
+        return match.group(1)
+    else:
+        return 'blah'
+        
+def isVideoDone(basePath, videoHash):
+    doneFilePath = os.path.join(basePath, '.done', videoHash)
+    if os.path.isfile(doneFilePath):
+        return True
+    else:
+        return False
+
+def touch(fname, times=None):
+    with file(fname, 'a'):
+        os.utime(fname, times)
+
+def setVideoDone(basePath, videoHash):
+    doneFilePath = os.path.join(basePath, '.done', videoHash)
+    if not os.path.isfile(doneFilePath):
+        touch(doneFilePath)
 
 def getExecutableName():
     osname = os.name
@@ -85,25 +104,29 @@ def processUser(user, basePath):
         folderPattern = folder.attrib['pattern']
         prog = re.compile(folderPattern)
         checkFolder(folderPath)
-        cleanDirectory(folderPath, daysToKeep)
+        #cleanDirectory(folderPath, daysToKeep)
         for videoId,videoTitle in videoIdDict.iteritems():
-            result = prog.search(videoTitle)
-            if result:
-                print '\n\t\t|-- Processing video: ' + videoTitle
-                executable = getExecutableName()
-                argument = ' --output "' + folderPath + os.sep + '%(upload_date)s-%(stitle)s.%(ext)s" --max-quality ' + maxQuality + ' --match-title "' + folderPattern + '" "'+ videoId + '"'
-                command = executable + argument
-                ret = os.system(command)
-                if ret == 0:
-                    print '*****download successfull'
-                else:
-                    print '*****download unsuccessfull - will try again on next iteration'
+            videoHash = getVideoHash(videoId)
+            #print videoHash + ':' + str(isVideoDone(basePath, videoHash))
+            if not isVideoDone(basePath, videoHash):
+                result = prog.search(videoTitle)
+                if result:
+                    print '\n\t\t|-- Processing video: ' + videoTitle
+                    executable = getExecutableName()
+                    argument = ' --output "' + folderPath + os.sep + '%(upload_date)s-%(stitle)s.%(ext)s" --max-quality ' + maxQuality + ' --match-title "' + folderPattern + '" "'+ videoId + '"'
+                    command = executable + argument
+                    ret = os.system(command)
+                    if ret == 0:
+                        print '*****download successfull'
+                        setVideoDone(basePath, videoHash)
+                    else:
+                        print '*****download unsuccessfull - will try again on next iteration'
 
 
 def main():
     settings = getSettings()
     basePath = settings.attrib['baseDirectoryPath']
-    print basePath
+    doneFolderPath = checkDoneFolder(basePath)
     for user in settings:
         processUser(user, basePath)
 
