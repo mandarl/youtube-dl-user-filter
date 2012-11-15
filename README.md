@@ -11,7 +11,10 @@ Python script to download youtube videos uploaded by specified users and filters
 * ~~Save done videos list in .done folder~~
 
 
-**settings.xml:**
+**Youtube Quality constants:** http://en.wikipedia.org/wiki/YouTube#Quality_and_codecs
+
+
+**settings.xml example:**
 `````xml
 <?xml version="1.0"?>
 <!-- All folders will be created relative to the baseDirectoryPath -->
