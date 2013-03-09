@@ -4,6 +4,7 @@
 
 #python youtube-dl-user-filter.py
 
+
 import xml.etree.ElementTree as ET
 import urllib
 import os
@@ -15,7 +16,7 @@ import pprint
 
 
 def getSettings():
-    tree = ET.parse('settings.xml')
+    tree = ET.parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'settings.xml'))
     settings = tree.getroot()
     return settings
     
@@ -46,7 +47,7 @@ def cleanDirectory(directoryPath, daysToKeep):
                 print 'deleting file:' + f
                 if os.path.isfile(f):
                     print 'deleting file:' + f
-                    #os.remove(os.path.join(directoryPath, f))
+                    os.remove(os.path.join(directoryPath, f))
     except Exception as e:
         print 'Error deleting file!'
         print traceback.format_exception(*sys.exc_info())
@@ -77,9 +78,9 @@ def setVideoDone(basePath, videoHash):
 def getExecutableName():
     osname = os.name
     if osname == 'posix':
-        executable = '.' + os.sep + 'youtube-dl'
+        executable = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'youtube-dl')
     elif osname == 'nt':
-        executable = 'python youtube-dl'
+        executable = 'python ' + os.path.join(os.path.dirname(os.path.realpath(__file__)), 'youtube-dl')
     else:
         raise Exception('Unknown OS: this script only works on NT or POSIX')
     return executable
