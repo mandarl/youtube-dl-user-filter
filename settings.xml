@@ -2,34 +2,38 @@
 <!-- All folders are created relative to the baseDirectoryPath -->
 <root baseDirectoryPath="/mnt/sda_part1/root/media/Youtube">
     <user name="PBSNewsHour" maxQuality="18">
-        <!-- Make a folder named "Shields and Brooks" and download all videos
+         <!-- Make a folder named "Shields and Brooks" and download all videos
                 with the title matching the regex pattern (Shields|Brooks) -->
-        <folder name="Shields and Brooks" pattern="(Shields|Brooks|India)" daysToKeep="30" />
+        <folder name="PBS Newshour" pattern="(Shields|Brooks|India|Pakistan|Tech|Google|Apple|Samsung|Mobile|Software)" daysToKeep="30" />
     </user>
 
     <user name="cnettv" maxQuality="18">
-        <folder name="CNET/The404" pattern="^The.404" daysToKeep="15" />
-        <folder name="CNET/Crave" pattern="^Crave" daysToKeep="15" />
-        <folder name="CNET/AlwaysOn" pattern="^Always.On.*Ep" daysToKeep="15" />
-        <folder name="CNET/OnCars" pattern="^CNET.On.Cars.*Ep" daysToKeep="15" />
+        <folder name="CNET/The404" pattern="^The.404" daysToKeep="30" />
+        <folder name="CNET/The404" pattern="^Ep..1\d\d\d" daysToKeep="30" />
+        <folder name="CNET/Crave" pattern="^Crave" daysToKeep="30" />
+        <folder name="CNET/AlwaysOn" pattern="^Always.On.*Ep" daysToKeep="30" />
+        <folder name="CNET/OnCars" pattern="^CNET.On.Cars.*Ep" daysToKeep="30" />
+        <folder name="CNET/OnCars" pattern="^Car Tech" daysToKeep="30" />
     </user>
 
     <user name="techcrunch" maxQuality="18">
-        <folder name="TechCrunch" pattern=".*" daysToKeep="20" />
+        <folder name="TechCrunch" pattern=".*Crunch.*Week.*" daysToKeep="50" />
+        <folder name="TechCrunch" pattern=".*keen.*" daysToKeep="50" />
     </user>
 
     <user name="TheVerge" maxQuality="18">
-        <folder name="TheVerge" pattern=".*" daysToKeep="15" />
+        <folder name="TheVerge" pattern=".*" daysToKeep="30" />
     </user>
     
     <user name="MarakanaTechTV" maxQuality="18">
-        <folder name="MarakanaTechTV" pattern=".*" daysToKeep="30" />
+        <folder name="MarakanaTechTV" pattern=".*" daysToKeep="60" />
     </user>
 
-    <user name="androiddevelopers" maxQuality="18">
+    <user name="googledevelopers" maxQuality="18">
         <folder name="android/OfficeHours" pattern="Office.Hours.*EMEA" daysToKeep="60" />
         <folder name="android/AppClinic" pattern="The.App.Clinic" daysToKeep="60" />
         <folder name="android/DesignInAction" pattern="Android.Design.in.Action" daysToKeep="60" />
+        <folder name="GoogleIO" pattern="2013" daysToKeep="60" />
     </user>
     
     <user name="TEDtalksDirector" maxQuality="18">
@@ -47,5 +51,5 @@
     <user name="diggnation" maxQuality="18">
         <folder name="diggnation" pattern=".*" daysToKeep="30" />
     </user>
-            
+
 </root>

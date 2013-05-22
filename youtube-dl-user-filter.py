@@ -1,4 +1,4 @@
-
+#!/opt/usr/bin/python
 
 #http://gdata.youtube.com/feeds/base/videos?author=CNETTV&fields=entry%28link[@rel=%27alternate%27]%28@href%29%29
 
@@ -28,6 +28,7 @@ def getUploadedVideoIds(userName):
     for entry in feed:
         videoId = entry[1].attrib['href']
         videoIdDict[videoId] = entry[0].text
+        #videoIdDict['9pmPa_KxsAM'] = 'Google I/O 2013: Keynote'
     return videoIdDict
     
 def checkFolder(folderPath):
@@ -42,15 +43,22 @@ def checkDoneFolder(basePath):
 def cleanDirectory(directoryPath, daysToKeep):
     try:
         now = time.time()
+        count = 0;
         for f in os.listdir(directoryPath):
+            count = count + 1
+            #print '\r\nfile found:' + f
+            #print 'date:' + str(os.stat(os.path.join(directoryPath, f)).st_mtime)
+            #print 'target date:' + str(now - daysToKeep * 86400)
+            #print 'daysToKeep:' + str(daysToKeep) + '\r\n'
             if os.stat(os.path.join(directoryPath, f)).st_mtime < now - daysToKeep * 86400:
-                print 'deleting file:' + f
-                if os.path.isfile(f):
+                if os.path.isfile(os.path.join(directoryPath, f)):
                     print 'deleting file:' + f
                     os.remove(os.path.join(directoryPath, f))
+        #if count == 0:
+            #os.remove(directoryPath)
     except Exception as e:
-        print 'Error deleting file!'
-        print traceback.format_exception(*sys.exc_info())
+        print 'Error deleting file:' + str(e)
+        #print traceback.format_exception(*sys.exc_info())
 
 def getVideoHash(videoId):
     match = re.search('v\=([^&]+)', videoId)
@@ -105,23 +113,24 @@ def processUser(user, basePath):
         folderPattern = folder.attrib['pattern']
         prog = re.compile(folderPattern)
         checkFolder(folderPath)
-        #cleanDirectory(folderPath, daysToKeep)
         for videoId,videoTitle in videoIdDict.iteritems():
             videoHash = getVideoHash(videoId)
             #print videoHash + ':' + str(isVideoDone(basePath, videoHash))
             if not isVideoDone(basePath, videoHash):
                 result = prog.search(videoTitle)
                 if result:
-                    print '\n\t\t|-- Processing video: ' + videoTitle
+                    print '\n\t\t|-- Processing video: ' + videoTitle.encode('utf-8')
                     executable = getExecutableName()
                     argument = ' --output "' + folderPath + os.sep + '%(upload_date)s-%(stitle)s.%(ext)s" --max-quality ' + maxQuality + ' --match-title "' + folderPattern + '" "'+ videoId + '"'
                     command = executable + argument
+                    ret = 1
                     ret = os.system(command)
                     if ret == 0:
                         print '*****download successfull'
                         setVideoDone(basePath, videoHash)
                     else:
                         print '*****download unsuccessfull - will try again on next iteration'
+        cleanDirectory(folderPath, daysToKeep)
 
 
 def main():
